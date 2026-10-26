@@ -3,7 +3,6 @@ import { RegisterRequest } from '../dto/register.request';
 import { LoginRequest } from '../dto/login.request';
 import { AuthResponse } from '../dto/auth.response';
 import bcrypt from 'bcryptjs';
-import * as jwtUtil from '../../../shared/utils/jwt';
 
 export class AuthService {
   constructor(private userRepo: IUserRepository) {}
@@ -24,11 +23,7 @@ export class AuthService {
       isAdm: false,
     });
 
-    const token = jwtUtil.sign({ sub: created.id, email: created.email });
-
     return {
-      accessToken: token,
-      expiresIn: jwtUtil.expiresInSeconds(),
       user: {
         id: created.id,
         email: created.email,
@@ -46,10 +41,7 @@ export class AuthService {
     const match = await bcrypt.compare(dto.password, user.passwordHash);
     if (!match) throw new Error('Invalid credentials');
 
-    const token = jwtUtil.sign({ sub: user.id, email: user.email });
     return {
-      accessToken: token,
-      expiresIn: jwtUtil.expiresInSeconds(),
       user: {
         id: user.id,
         email: user.email,

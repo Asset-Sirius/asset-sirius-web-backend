@@ -3,11 +3,7 @@ import { makeUser } from '../../mocks/factories/user.factory';
 import AuthService from '../../../src/modules/auth/service/auth.service';
 
 jest.mock('bcryptjs');
-jest.mock('../../../src/shared/utils/jwt', () => ({
-  sign: jest.fn(() => 'token:mock'),
-  verify: jest.fn(() => ({ sub: 'any' })),
-  expiresInSeconds: jest.fn(() => 3600),
-}));
+// JWT removed: no token generation/verification in-service anymore
 
 describe('AuthService', () => {
   let repo: UserRepositoryInMemory;
@@ -21,7 +17,8 @@ describe('AuthService', () => {
   it('registers a new user and returns token', async () => {
     const dto = { email: 'a@b.com', password: 'secret' };
     const res = await service.register(dto as any);
-    expect(res.accessToken).toBe('token:mock');
+    expect(res.user).toBeDefined();
+    expect(res.user.email).toBe(dto.email);
     const stored = await repo.findByEmail(dto.email);
     expect(stored).not.toBeNull();
     expect(stored!.passwordHash).toBe('hashed:secret');
@@ -38,7 +35,8 @@ describe('AuthService', () => {
     const user = makeUser({ email: 'login@t.com', passwordHash: hashed });
     repo.seed([user]);
     const res = await service.login({ email: 'login@t.com', password: 'pass' } as any);
-    expect(res.accessToken).toBe('token:mock');
+    expect(res.user).toBeDefined();
+    expect(res.user.email).toBe('login@t.com');
   });
 
   it('throws on invalid login', async () => {

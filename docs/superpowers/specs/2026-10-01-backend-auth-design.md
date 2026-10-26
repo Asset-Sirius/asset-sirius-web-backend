@@ -9,7 +9,7 @@ Overview
 
 Decisions
 - DB-agnostic: IUserRepository interface + in-memory implementation.
-- JWT: HS256, secret via JWT_SECRET, expiresIn default 1h.
+- Authentication tokens removed (no JWT used in this design).
 - Passwords: hashed with bcryptjs; database column needs to accept bcrypt hashes (VARCHAR(255)).
 - Token storage on frontend: sessionStorage (note: vulnerable to XSS; recommend HttpOnly cookie later).
 
@@ -21,18 +21,18 @@ Schema mapping notes
 Routes
 - POST /api/auth/register
   - Body: { email, password, fkGerente?, fkGestorFundo? }
-  - Response: { accessToken, expiresIn, user }
+- Response: { user }
 - POST /api/auth/login
   - Body: { email, password }
-  - Response: { accessToken, expiresIn, user }
+- Response: { user }
 
 Testing
 - Jest + ts-jest
-- Mocks: in-memory repository, jest mocks for bcryptjs and jwt util
+- Mocks: in-memory repository, jest mocks for bcryptjs
 - Tests included for AuthService (register/login) and can be extended for controller tests.
 
 How to run (local dev)
-1. copy .env with JWT_SECRET
+1. copy .env as needed for DB or other secrets
 2. npm install
 3. npm run dev
 4. npm test

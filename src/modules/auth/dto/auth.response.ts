@@ -1,6 +1,4 @@
 export type AuthResponse = {
-  accessToken: string;
-  expiresIn: number;
   user: {
     id: string;
     email: string;
