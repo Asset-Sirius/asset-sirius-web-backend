@@ -1,6 +1,6 @@
 import express from 'express';
 import { json } from 'express';
-import authModule from './modules/auth/index.ts';
+import authModule from './modules/auth';
 
 export function createApp() {
   const app = express();

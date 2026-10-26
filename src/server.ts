@@ -1,4 +1,4 @@
-import createApp from './app.ts';
+import createApp from './app';
 
 const app = createApp();
 const port = process.env.PORT ? Number(process.env.PORT) : 3000;

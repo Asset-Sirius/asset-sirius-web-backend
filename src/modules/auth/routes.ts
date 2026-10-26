@@ -1,2 +1,2 @@
-import router from './controller/auth.controller.ts';
+import router from './controller/auth.controller';
 export default router;
