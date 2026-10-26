@@ -1,13 +1,13 @@
 import { Router, Request, Response } from 'express';
 import AuthService from '../service/auth.service';
-import { UserRepositoryInMemory } from '../repository/inMemory/user.repository.inMemory';
+import { UserRepositoryMySQL } from '../repository/mysql/user.repository.mysql';
 import { RegisterRequest } from '../dto/register.request';
 import { LoginRequest } from '../dto/login.request';
 
-// create a default router with in-memory repo for now
+// create a default router with MySQL-backed repository
 const router = Router();
-const userRepo = new UserRepositoryInMemory();
-const authService = new AuthService(userRepo);
+const userRepo = new UserRepositoryMySQL();
+  const authService = new AuthService(userRepo);
 
 router.post('/register', async (req: Request, res: Response) => {
   const body = req.body as RegisterRequest;
