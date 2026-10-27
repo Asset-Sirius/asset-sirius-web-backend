@@ -11,8 +11,16 @@ const authService = new AuthService(userRepo);
 
 router.post('/register', async (req: Request, res: Response) => {
   const body = req.body as RegisterRequest;
-  // Basic request logging for diagnostics (avoid sensitive data leakage)
-  console.log(`[auth][register] incoming request - time=${new Date().toISOString()} route=/register bodyKeys=${Object.keys(req.body).join(',')}`);
+  // Basic validation: require email and password
+  if (!body || !body.email || !body.password) {
+    const keys = req.body && typeof req.body === 'object' ? Object.keys(req.body).join(',') : 'none';
+    console.warn(`[auth][register] bad request - missing email or password - bodyKeys=${keys}`);
+    return res.status(400).json({ message: 'Missing email or password' });
+  }
+
+  // Log incoming register attempt - mask password
+  const maskedPassword = body.password ? '***' : 'null';
+  console.log(`[auth][register] incoming request - time=${new Date().toISOString()} route=/register email=${body.email} password=${maskedPassword}`);
   try {
     const out = await authService.register(body);
     console.log(`[auth][register] success - userId=${out.user?.id ?? 'unknown'}`);
@@ -25,6 +33,11 @@ router.post('/register', async (req: Request, res: Response) => {
 
 router.post('/login', async (req: Request, res: Response) => {
   const body = req.body as LoginRequest;
+  // Basic validation: require email and password
+  if (!body || !body.email || !body.password) {
+    console.warn(`[auth][login] bad request - missing email or password - bodyKeys=${Object.keys(req.body).join(',')}`);
+    return res.status(400).json({ message: 'Missing email or password' });
+  }
   // Log incoming login attempt - mask password
   const maskedPassword = body.password ? '***' : 'null';
   console.log(`[auth][login] incoming request - time=${new Date().toISOString()} route=/login email=${body.email} password=${maskedPassword}`);

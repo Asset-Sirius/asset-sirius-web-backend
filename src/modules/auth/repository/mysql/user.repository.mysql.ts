@@ -1,23 +1,24 @@
 import { IUserRepository, UserEntity } from '../interfaces/iUserRepository';
 import pool from '../../../../db';
-import { v4 as uuid } from 'uuid';
 
 export class UserRepositoryMySQL implements IUserRepository {
   async create(user: Omit<UserEntity, 'id' | 'createdAt'>): Promise<UserEntity> {
-    const id = uuid();
     const fkGerente = user.fkGerente ?? null;
     const fkGestorFundo = user.fkGestorFundo ?? null;
     const isAdm = user.isAdm ?? false;
 
     // Insert into usuário table. Column names follow the existing DB spec in docs.
     // Log query and parameter summary for diagnostics (don't log password hash value)
-    console.log(`[userRepo][create] executing insert - id=${id} email=${user.email} fkGerente=${fkGerente} fkGestorFundo=${fkGestorFundo} isAdm=${isAdm}`);
-    await pool.execute(
+    console.log(`[userRepo][create] executing insert - email=${user.email} fkGerente=${fkGerente} fkGestorFundo=${fkGestorFundo} isAdm=${isAdm}`);
+    const [result]: any = await pool.execute(
       `INSERT INTO usuario
-        (id_usuario, fk_gerente, fk_gestor_fundo, email, senha, is_adm)
-       VALUES (?, ?, ?, ?, ?, ?)`,
-      [id, fkGerente, fkGestorFundo, user.email, user.passwordHash, isAdm]
+        (fk_gerente, fk_gestor_fundo, email, senha, is_adm)
+       VALUES (?, ?, ?, ?, ?)`,
+      [fkGerente, fkGestorFundo, user.email, user.passwordHash, isAdm]
     );
+    // mysql2 returns an OkPacket with insertId for inserts
+    const insertId = result?.insertId;
+    const id = insertId ? String(insertId) : '';
 
     return {
       id,
