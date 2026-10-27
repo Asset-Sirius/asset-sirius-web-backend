@@ -10,10 +10,12 @@ export class UserRepositoryMySQL implements IUserRepository {
     const isAdm = user.isAdm ?? false;
 
     // Insert into usuário table. Column names follow the existing DB spec in docs.
+    // Log query and parameter summary for diagnostics (don't log password hash value)
+    console.log(`[userRepo][create] executing insert - id=${id} email=${user.email} fkGerente=${fkGerente} fkGestorFundo=${fkGestorFundo} isAdm=${isAdm}`);
     await pool.execute(
       `INSERT INTO usuario
-        (id_usuario, fk_gerente, fk_gestor_fundo, email, senha, is_adm, created_at)
-       VALUES (?, ?, ?, ?, ?, ?, NOW())`,
+        (id_usuario, fk_gerente, fk_gestor_fundo, email, senha, is_adm)
+       VALUES (?, ?, ?, ?, ?, ?)`,
       [id, fkGerente, fkGestorFundo, user.email, user.passwordHash, isAdm]
     );
 
@@ -29,6 +31,8 @@ export class UserRepositoryMySQL implements IUserRepository {
   }
 
   async findByEmail(email: string): Promise<UserEntity | null> {
+    // Log the upcoming query for debugging reasons
+    console.log(`[userRepo][findByEmail] executing select - email=${email}`);
     const [rows]: any = await pool.execute(
       `SELECT
          id_usuario AS id,
@@ -36,8 +40,7 @@ export class UserRepositoryMySQL implements IUserRepository {
          fk_gestor_fundo AS fkGestorFundo,
          email,
          senha AS passwordHash,
-         is_adm AS isAdm,
-         created_at AS createdAt
+         is_adm AS isAdm
        FROM usuario WHERE email = ? LIMIT 1`,
       [email]
     );
@@ -55,6 +58,7 @@ export class UserRepositoryMySQL implements IUserRepository {
   }
 
   async findById(id: string): Promise<UserEntity | null> {
+    console.log(`[userRepo][findById] executing select - id=${id}`);
     const [rows]: any = await pool.execute(
       `SELECT
          id_usuario AS id,
@@ -62,8 +66,7 @@ export class UserRepositoryMySQL implements IUserRepository {
          fk_gestor_fundo AS fkGestorFundo,
          email,
          senha AS passwordHash,
-         is_adm AS isAdm,
-         created_at AS createdAt
+         is_adm AS isAdm
        FROM usuario WHERE id_usuario = ? LIMIT 1`,
       [id]
     );
